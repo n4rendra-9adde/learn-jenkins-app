@@ -14,6 +14,7 @@ pipeline {
                     ls -la
                     node --version
                     npm --version
+                    export npm_config_cache=$WORKSPACE/.npm-cache
                     npm ci
                     npm run build
                     ls -la
