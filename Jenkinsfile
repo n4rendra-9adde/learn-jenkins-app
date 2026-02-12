@@ -1,23 +1,25 @@
 pipeline {
-    agent any
+    agent none
 
     stages {
         stage('Build') {
             agent {
                 docker {
                     image 'node:18-alpine'
-                    reuseNode true
+                    args '-u node'
+                    reuseNode false
                 }
+            }
+            environment {
+                NPM_CONFIG_CACHE = "${WORKSPACE}/.npm-cache"
             }
             steps {
                 sh '''
-                    ls -la
+                    whoami
                     node --version
                     npm --version
-                    export npm_config_cache=$WORKSPACE/.npm-cache
                     npm ci
                     npm run build
-                    ls -la
                 '''
             }
         }
