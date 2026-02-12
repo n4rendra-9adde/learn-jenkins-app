@@ -1,30 +1,33 @@
 pipeline {
-    agent none
-
+    agent {
+        docker {
+            image 'node:18-alpine'
+            reuseNode false
+            args '-u root'  // Run as root to avoid permission issues
+        }
+    }
+    
     stages {
-        stage('Build') {
-            agent {
-                docker {
-                    image 'node:18-alpine'
-                    args '-u node'
-                }
-            }
-            environment {
-                NPM_CONFIG_CACHE = "${WORKSPACE}/.npm-cache"
-            }
+        stage('Debug') {
             steps {
                 sh '''
-                    set -x
+                    echo "=== SYSTEM INFO ==="
                     whoami
+                    id
+                    df -h
+                    free -m
+                    echo "=== NODE INFO ==="
                     node --version
                     npm --version
-
-                    echo "===== npm ci ====="
-                    npm ci
-
-                    echo "===== npm build ====="
-                    npm run build
+                    echo "=== DISK SPACE ==="
+                    du -sh / 2>/dev/null | head -1
                 '''
+            }
+        }
+        
+        stage('Build') {
+            steps {
+                sh 'npm ci --verbose'  // Verbose to see where it stops
             }
         }
     }
